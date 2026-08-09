@@ -23,6 +23,7 @@ import javax.swing.JButton;
 import javax.swing.Timer;
 
 import logic.MoveGenerator;
+import logic.MoveLogic;
 import model.Board;
 import model.Game;
 import model.HumanPlayer;
@@ -215,14 +216,77 @@ public class CheckerBoard extends JButton {
 			}
 		}
 		
-		// Highlight the selected tile if valid
+		// Highlight the selected tile and legal moves if valid
 		if (Board.isValidPoint(selected)) {
-			g.setColor(selectionValid? Color.GREEN : Color.RED);
-			g.fillRect(OFFSET_X + selected.x * BOX_SIZE,
-					OFFSET_Y + selected.y * BOX_SIZE,
-					BOX_SIZE, BOX_SIZE);
+			if (selectionValid) {
+				// Highlight selected tile
+				g.setColor(new Color(0, 255, 120, 130));
+				g.fillRect(OFFSET_X + selected.x * BOX_SIZE,
+						OFFSET_Y + selected.y * BOX_SIZE,
+						BOX_SIZE, BOX_SIZE);
+				g.setColor(new Color(0, 180, 80));
+				g.drawRect(OFFSET_X + selected.x * BOX_SIZE,
+						OFFSET_Y + selected.y * BOX_SIZE,
+						BOX_SIZE - 1, BOX_SIZE - 1);
+				
+				// Highlight possible movement destinations and captured pieces
+				List<Point> legalMoves = getLegalMoves(selected);
+				for (Point p : legalMoves) {
+					int px = OFFSET_X + p.x * BOX_SIZE;
+					int py = OFFSET_Y + p.y * BOX_SIZE;
+					boolean isSkip = Math.abs(p.x - selected.x) == 2;
+					
+					if (isSkip) {
+						// Highlight captured piece (middle tile) in semi-transparent red
+						Point mid = Board.middle(selected, p);
+						if (Board.isValidPoint(mid)) {
+							int mx = OFFSET_X + mid.x * BOX_SIZE;
+							int my = OFFSET_Y + mid.y * BOX_SIZE;
+							g.setColor(new Color(255, 40, 40, 140));
+							g.fillRect(mx, my, BOX_SIZE, BOX_SIZE);
+							g.setColor(new Color(220, 0, 0));
+							g.drawRect(mx, my, BOX_SIZE - 1, BOX_SIZE - 1);
+						}
+						
+						// Highlight capture destination tile in gold/orange
+						g.setColor(new Color(255, 215, 0, 120));
+						g.fillRect(px, py, BOX_SIZE, BOX_SIZE);
+						g.setColor(new Color(255, 140, 0));
+						g.drawRect(px, py, BOX_SIZE - 1, BOX_SIZE - 1);
+						
+						// Draw capture dot indicator
+						int dotSize = Math.max(12, BOX_SIZE / 3);
+						int dotX = px + (BOX_SIZE - dotSize) / 2;
+						int dotY = py + (BOX_SIZE - dotSize) / 2;
+						g.setColor(new Color(255, 140, 0, 230));
+						g.fillOval(dotX, dotY, dotSize, dotSize);
+						g.setColor(Color.WHITE);
+						g.drawOval(dotX, dotY, dotSize, dotSize);
+					} else {
+						// Highlight regular move destination tile in soft green
+						g.setColor(new Color(50, 205, 50, 110));
+						g.fillRect(px, py, BOX_SIZE, BOX_SIZE);
+						g.setColor(new Color(34, 139, 34));
+						g.drawRect(px, py, BOX_SIZE - 1, BOX_SIZE - 1);
+						
+						// Draw move dot indicator
+						int dotSize = Math.max(12, BOX_SIZE / 3);
+						int dotX = px + (BOX_SIZE - dotSize) / 2;
+						int dotY = py + (BOX_SIZE - dotSize) / 2;
+						g.setColor(new Color(34, 139, 34, 230));
+						g.fillOval(dotX, dotY, dotSize, dotSize);
+						g.setColor(Color.WHITE);
+						g.drawOval(dotX, dotY, dotSize, dotSize);
+					}
+				}
+			} else {
+				g.setColor(Color.RED);
+				g.fillRect(OFFSET_X + selected.x * BOX_SIZE,
+						OFFSET_Y + selected.y * BOX_SIZE,
+						BOX_SIZE, BOX_SIZE);
+			}
 		}
-		
+
 		// Draw the checkers
 		Board b = game.getBoard();
 		for (int y = 0; y < 8; y ++) {
@@ -419,9 +483,19 @@ public class CheckerBoard extends JButton {
 				updateNetwork();
 			}
 			change = (copy.isP1Turn() != change);
-			this.selected = change? null : sel;
+			if (change) {
+				this.selected = null;
+			} else if (game.getSkipIndex() >= 0) {
+				this.selected = Board.toPoint(game.getSkipIndex());
+			} else {
+				this.selected = sel;
+			}
 		} else {
-			this.selected = sel;
+			if (game.getSkipIndex() >= 0) {
+				this.selected = Board.toPoint(game.getSkipIndex());
+			} else {
+				this.selected = sel;
+			}
 		}
 		
 		// Check if the selection is valid
@@ -444,10 +518,16 @@ public class CheckerBoard extends JButton {
 	private boolean isValidSelection(Board b, boolean isP1Turn, Point selected) {
 
 		// Trivial cases
-		int i = Board.toIndex(selected), id = b.get(i);
+		int i = Board.toIndex(selected);
+		if (!Board.isValidIndex(i)) {
+			return false;
+		}
+		int id = b.get(i);
 		if (id == Board.EMPTY || id == Board.INVALID) { // no checker here
 			return false;
-		} else if(isP1Turn ^ Board.isBlackChecker(id)) { // wrong checker
+		} else if (isP1Turn ^ Board.isBlackChecker(id)) { // wrong checker
+			return false;
+		} else if (game.getSkipIndex() >= 0 && i != game.getSkipIndex()) { // multi-skip in progress
 			return false;
 		} else if (!MoveGenerator.getSkips(b, i).isEmpty()) { // skip available
 			return true;
@@ -471,6 +551,40 @@ public class CheckerBoard extends JButton {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Gets the list of legal move destination points for the specified start point.
+	 * 
+	 * @param selected the starting point of the checker.
+	 * @return a list of legal destination points.
+	 */
+	public List<Point> getLegalMoves(Point selected) {
+		List<Point> legalMoves = new ArrayList<>();
+		if (game == null || selected == null || !Board.isValidPoint(selected)) {
+			return legalMoves;
+		}
+		
+		int startIndex = Board.toIndex(selected);
+		Board b = game.getBoard();
+		
+		// Check candidate skips
+		List<Point> skips = MoveGenerator.getSkips(b, startIndex);
+		for (Point end : skips) {
+			if (MoveLogic.isValidMove(game, startIndex, Board.toIndex(end))) {
+				legalMoves.add(end);
+			}
+		}
+		
+		// Check candidate normal moves
+		List<Point> moves = MoveGenerator.getMoves(b, startIndex);
+		for (Point end : moves) {
+			if (MoveLogic.isValidMove(game, startIndex, Board.toIndex(end))) {
+				legalMoves.add(end);
+			}
+		}
+		
+		return legalMoves;
 	}
 
 	/**

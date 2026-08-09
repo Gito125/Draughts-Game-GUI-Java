@@ -58,6 +58,11 @@ javac --release 21 $(find . -name "*.java") && java ui.Main
 ### User Interface
 The checkers program comes complete with all graphical user interface components that scale relative to the size of the window. It is a user-friendly UI and has options to change the type of player for both player 1 and 2, and restart the game. In addition, it provides a checker board UI to show the current game state.
 
+### Movement Highlights & Multi-Capture Support
+- **Move Highlights**: Clicking on a piece displays clear visual indicators for all legal destination squares. Standard 1-step moves are highlighted with green target dots and overlays.
+- **Capture Indicators**: When a capture (eating a piece) is available, destination tiles are highlighted in gold/orange with capture target dots, and the enemy piece that will be eaten is highlighted in semi-transparent red.
+- **Multi-Captures (Eating 2+ Pieces)**: Supports chain captures (multi-jumps) under official draughts rules. When a piece captures an opponent piece and further skips are available, selection remains locked onto that active piece and immediately displays the next capture target(s) until the multi-jump sequence is complete.
+
 ### Different Player Types
 Multiple different types of players are supported and can be selected by the user:
 1. Human - this is the player that allows the user to interact with the checker board when it is their turn.
