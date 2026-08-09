@@ -7,10 +7,52 @@ A checkers game with a GUI implemented in Java. The program supports a simple co
 The computer player works by assigning a weight for each move. When a move weight is calculated, it is based off information such as move safety (e.g. if the move results in the checker being taken by the other player, it is less likely to make that move). It checks a number of other factors and assigns a final weight. The move with the highest weight is chosen as the move. To ensure computer players are less predictable, if multiple moves have the same weight then one is randomly chosen.
 
 ## Compile and Run
-### Manual
-1. In terminal/command prompt, navigate to `src/`
-1. Compile with `javac ui/*.java model/*.java logic/*.java network/*.java`
-1. Run with `java ui.Main`
+
+### Prerequisites
+- **Java Development Kit (JDK 21 or higher)**
+
+### Quick Command (Compile & Run)
+```bash
+find . -name "*.class" -delete && javac --release 21 $(find . -name "*.java") && java ui.Main
+```
+
+### Compile and Run the Program
+```bash
+javac --release 21 $(find . -name "*.java") && java ui.Main
+```
+
+### Step-by-Step Instructions
+
+#### Linux / macOS
+1. Open terminal and navigate to the project directory.
+2. Clean existing class files (prevents `UnsupportedClassVersionError` if compiled with a higher JDK version):
+   ```bash
+   find . -name "*.class" -delete
+   ```
+3. Compile targeting Java 21 compatibility:
+   ```bash
+   javac --release 21 $(find . -name "*.java")
+   ```
+4. Run the program:
+   ```bash
+   java ui.Main
+   ```
+
+#### Windows (Command Prompt / PowerShell)
+1. Clean old class files:
+   ```cmd
+   del /s *.class
+   ```
+2. Compile:
+   ```cmd
+   javac --release 21 ui\*.java model\*.java logic\*.java network\*.java
+   ```
+3. Run:
+   ```cmd
+   java ui.Main
+   ```
+
+> **Note on `UnsupportedClassVersionError`**: If `javac` on your machine belongs to a newer JDK (e.g. Java 25) than your default `java` runtime (e.g. Java 21), using `--release 21` ensures the compiled `.class` files remain compatible with your Java 21 runtime.
 
 ## Features
 ### User Interface
