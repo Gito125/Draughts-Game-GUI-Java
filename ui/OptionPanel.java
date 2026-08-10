@@ -6,7 +6,7 @@
  *              (Original Author: Devon McGrath)
  * Course:      Data Structures and Algorithms (2205 ST) — Y2T2
  * 
- * Description: User interface control panel allowing players to restart games,
+ * Description: User interface control panel allowing players to start/restart games,
  *              select player controllers (Human vs Computer), set AI difficulty
  *              levels (Easy, Medium, Hard), and adjust dynamic move delay speed.
  *
@@ -39,7 +39,7 @@ import model.Player;
 
 /**
  * The {@code OptionPanel} class provides Swing controls for configuring draughts game settings,
- * including controller types, AI difficulty levels, and game execution speed.
+ * including controller types, AI difficulty levels, start/restart buttons, and game execution speed.
  */
 public class OptionPanel extends JPanel {
 
@@ -48,7 +48,10 @@ public class OptionPanel extends JPanel {
 	/** Parent CheckersWindow reference. */
 	private CheckersWindow window;
 	
-	/** Button to restart game session. */
+	/** Button to start a new game session. */
+	private JButton startBtn;
+
+	/** Button to restart the game session. */
 	private JButton restartBtn;
 	
 	/** Player 1 controller selection combo box ("Human", "Computer"). */
@@ -82,7 +85,9 @@ public class OptionPanel extends JPanel {
 		final String[] playerTypeOpts = {"Human", "Computer"};
 		final String[] diffOpts = {"Easy", "Medium", "Hard"};
 
-		this.restartBtn = new JButton("Restart");
+		this.startBtn = new JButton("Start Game");
+		this.restartBtn = new JButton("Restart Game");
+		this.startBtn.addActionListener(ol);
 		this.restartBtn.addActionListener(ol);
 
 		this.player1Opts = new JComboBox<>(playerTypeOpts);
@@ -118,6 +123,7 @@ public class OptionPanel extends JPanel {
 		JPanel bottom = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JPanel speedPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
+		top.add(startBtn);
 		top.add(restartBtn);
 		
 		middle.add(new JLabel("(black) P1: "));
@@ -187,7 +193,7 @@ public class OptionPanel extends JPanel {
 			
 			Object src = e.getSource();
 
-			if (src == restartBtn) {
+			if (src == startBtn || src == restartBtn) {
 				window.restart();
 			} else if (src == player1Opts || src == player1Diff) {
 				boolean isComp = "Computer".equals(player1Opts.getSelectedItem());

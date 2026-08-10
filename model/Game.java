@@ -125,11 +125,13 @@ public class Game {
 	}
 	
 	/**
-	 * Resets the game to initial state with Black moving first.
+	 * Resets the game to initial state with a randomly chosen starting player
+	 * (Player 1 Black or Player 2 White).
 	 */
 	public void restart() {
 		this.board = new Board();
-		this.isP1Turn = true;
+		// Randomly select starting player: 50% chance for P1 (Black), 50% chance for P2 (White)
+		this.isP1Turn = (Math.random() < 0.5);
 		this.skipIndex = -1;
 		this.movesSinceCapture = 0;
 		this.totalMoves = 0;
@@ -137,6 +139,13 @@ public class Game {
 			this.stateHistory.clear();
 			this.stateHistory.add(this.board.toString());
 		}
+	}
+
+	/**
+	 * Starts a new game session with a randomly chosen starting player.
+	 */
+	public void startNewGame() {
+		restart();
 	}
 	
 	/**
