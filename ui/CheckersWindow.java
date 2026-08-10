@@ -18,10 +18,8 @@
 package ui;
 
 import java.awt.BorderLayout;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-
 import model.Player;
 
 /**
@@ -38,7 +36,7 @@ public class CheckersWindow extends JFrame {
 	public static final int DEFAULT_HEIGHT = 640;
 	
 	/** Application title string. */
-	public static final String DEFAULT_TITLE = "Java Checkers - Group 3";
+	public static final String DEFAULT_TITLE = "Drafts or Draughts (Checkers) Game";
 	
 	/** Checkerboard GUI board component. */
 	private CheckerBoard board;
