@@ -1,6 +1,22 @@
-/* Name: MoveGenerator
- * Author: Devon McGrath
- * Description: This class is responsible for getting possible moves.
+/*
+ * ============================================================================
+ * File:        MoveGenerator.java
+ * Package:     logic
+ * Authors:     Group 3 — Precious, Gideon, Peter
+ *              (Original Author: Devon McGrath)
+ * Course:      Data Structures and Algorithms (2205 ST) — Y2T2
+ * 
+ * Description: Generates legal single-step move destination coordinates and multi-step
+ *              capture skip destination coordinates for pieces on the checkerboard.
+ *
+ * DSA Concepts Applied:
+ *   - Graphs (Graphs.pptx): Explores board graph adjacency vertices for diagonal edges
+ *     at distance 1 (normal move) and distance 2 (capture skip).
+ *   - BFS & DFS (BFS & DFS.pptx): Serves as child-node expansion generator during DFS
+ *     game tree traversal in Minimax AI search algorithms.
+ *   - Linked Lists (Linked Lists.pptx): Dynamically populates and filters List<Point>
+ *     collections representing potential geometric move destinations.
+ * ============================================================================
  */
 
 package logic;
@@ -12,51 +28,48 @@ import java.util.List;
 import model.Board;
 
 /**
- * The {@code MoveGenerator} class provides a method for determining if a given
- * checker can make any move or skip.
+ * The {@code MoveGenerator} class provides static methods to generate and filter
+ * candidate diagonal move endpoints and capture jump endpoints for checkers.
  */
 public class MoveGenerator {
 
 	/**
-	 * Gets a list of move end-points for a given start index.
+	 * Gets a list of legal 1-step diagonal move destination points for a piece at the start point.
 	 * 
-	 * @param board	the board to look for available moves.
-	 * @param start	the center index to look for moves around.
-	 * @return the list of points such that the start to a given point
-	 * represents a move available.
-	 * @see {@link #getMoves(Board, int)}
+	 * @param board board instance to query
+	 * @param start start Point(x, y)
+	 * @return List of valid move destination points
 	 */
 	public static List<Point> getMoves(Board board, Point start) {
 		return getMoves(board, Board.toIndex(start));
 	}
 	
 	/**
-	 * Gets a list of move end-points for a given start index.
+	 * Gets a list of legal 1-step diagonal move destination points for a piece at startIndex.
 	 * 
-	 * @param board			the board to look for available moves.
-	 * @param startIndex	the center index to look for moves around.
-	 * @return the list of points such that the start to a given point
-	 * represents a move available.
-	 * @see {@link #getMoves(Board, Point)}
+	 * <p><b>DSA Reference (Graphs.pptx / BFS & DFS.pptx):</b>
+	 * Traverses adjacent graph vertices at distance 1 and filters out occupied tiles.</p>
+	 * 
+	 * @param board      board instance to query
+	 * @param startIndex start tile index (0 to 31)
+	 * @return List of empty destination Points
+	 * @complexity O(1) constant time (checks max 4 diagonal neighbors)
 	 */
 	public static List<Point> getMoves(Board board, int startIndex) {
-		
-		// Trivial cases
 		List<Point> endPoints = new ArrayList<>();
 		if (board == null || !Board.isValidIndex(startIndex)) {
 			return endPoints;
 		}
 		
-		// Determine possible points
 		int id = board.get(startIndex);
 		Point p = Board.toPoint(startIndex);
 		addPoints(endPoints, p, id, 1);
 		
-		// Remove invalid points
-		for (int i = 0; i < endPoints.size(); i ++) {
+		// Filter out non-empty destination tiles
+		for (int i = 0; i < endPoints.size(); i++) {
 			Point end = endPoints.get(i);
 			if (board.get(end.x, end.y) != Board.EMPTY) {
-				endPoints.remove(i --);
+				endPoints.remove(i--);
 			}
 		}
 		
@@ -64,47 +77,42 @@ public class MoveGenerator {
 	}
 	
 	/**
-	 * Gets a list of skip end-points for a given starting point.
+	 * Gets a list of candidate 2-step capture skip destination points for a piece at start point.
 	 * 
-	 * @param board	the board to look for available skips.
-	 * @param start	the center index to look for skips around.
-	 * @return the list of points such that the start to a given point
-	 * represents a skip available.
-	 * @see {@link #getSkips(Board, int)}
+	 * @param board board instance to query
+	 * @param start start Point(x, y)
+	 * @return List of valid jump destination points
 	 */
 	public static List<Point> getSkips(Board board, Point start) {
 		return getSkips(board, Board.toIndex(start));
 	}
 	
 	/**
-	 * Gets a list of skip end-points for a given start index.
+	 * Gets a list of candidate 2-step capture skip destination points for a piece at startIndex.
 	 * 
-	 * @param board			the board to look for available skips.
-	 * @param startIndex	the center index to look for skips around.
-	 * @return the list of points such that the start to a given point
-	 * represents a skip available.
-	 * @see {@link #getSkips(Board, Point)}
+	 * <p><b>DSA Reference (Graphs.pptx):</b>
+	 * Checks graph vertices at distance 2 and validates opponent piece capture conditions.</p>
+	 * 
+	 * @param board      board instance to query
+	 * @param startIndex start tile index (0 to 31)
+	 * @return List of valid jump destination Points
+	 * @complexity O(1) constant time (checks max 4 jump directions)
 	 */
 	public static List<Point> getSkips(Board board, int startIndex) {
-		
-		// Trivial cases
 		List<Point> endPoints = new ArrayList<>();
 		if (board == null || !Board.isValidIndex(startIndex)) {
 			return endPoints;
 		}
 		
-		// Determine possible points
 		int id = board.get(startIndex);
 		Point p = Board.toPoint(startIndex);
 		addPoints(endPoints, p, id, 2);
 		
-		// Remove invalid points
-		for (int i = 0; i < endPoints.size(); i ++) {
-			
-			// Check that the skip is valid
+		// Filter out invalid skips (must jump enemy piece onto an empty square)
+		for (int i = 0; i < endPoints.size(); i++) {
 			Point end = endPoints.get(i);
 			if (!isValidSkip(board, startIndex, Board.toIndex(end))) {
-				endPoints.remove(i --);
+				endPoints.remove(i--);
 			}
 		}
 
@@ -112,26 +120,26 @@ public class MoveGenerator {
 	}
 	
 	/**
-	 * Checks if a skip is valid.
+	 * Validates whether a candidate skip from startIndex to endIndex is legal.
+	 * Requires the destination to be EMPTY and the jumped middle tile to contain an enemy piece.
 	 * 
-	 * @param board			the board to check against.
-	 * @param startIndex	the start index of the skip.
-	 * @param endIndex		the end index of the skip.
-	 * @return true if and only if the skip can be performed.
+	 * @param board      board instance to query
+	 * @param startIndex start tile index (0 to 31)
+	 * @param endIndex   end tile index (0 to 31)
+	 * @return true if skip is legal under draughts rules
+	 * @complexity O(1) constant time lookup
 	 */
-	public static boolean isValidSkip(Board board,
-			int startIndex, int endIndex) {
-		
+	public static boolean isValidSkip(Board board, int startIndex, int endIndex) {
 		if (board == null) {
 			return false;
 		}
 
-		// Check that end is empty
+		// Destination must be EMPTY
 		if (board.get(endIndex) != Board.EMPTY) {
 			return false;
 		}
 		
-		// Check that middle is enemy
+		// Middle tile must contain an opponent piece
 		int id = board.get(startIndex);
 		int midID = board.get(Board.toIndex(Board.middle(startIndex, endIndex)));
 		if (id == Board.INVALID || id == Board.EMPTY) {
@@ -146,23 +154,25 @@ public class MoveGenerator {
 	}
 	
 	/**
-	 * Adds points that could potentially result in moves/skips.
+	 * Helper method to calculate candidate diagonal offset points for normal pieces and kings.
+	 * Black normal checkers move down (+y), White normal checkers move up (-y), Kings move both.
 	 * 
-	 * @param points	the list of points to add to.
-	 * @param p			the center point.
-	 * @param id		the ID at the center point.
-	 * @param delta		the amount to add/subtract.
+	 * @param points output list to receive generated points
+	 * @param p      center Point coordinate
+	 * @param id     piece ID
+	 * @param delta  offset distance (1 for moves, 2 for skips)
+	 * @complexity O(1) constant time additions
 	 */
 	public static void addPoints(List<Point> points, Point p, int id, int delta) {
-		
-		// Add points moving down
 		boolean isKing = Board.isKingChecker(id);
+		
+		// Downward diagonal offsets (+y) for Black checkers and Kings
 		if (isKing || id == Board.BLACK_CHECKER) {
 			points.add(new Point(p.x + delta, p.y + delta));
 			points.add(new Point(p.x - delta, p.y + delta));
 		}
 		
-		// Add points moving up
+		// Upward diagonal offsets (-y) for White checkers and Kings
 		if (isKing || id == Board.WHITE_CHECKER) {
 			points.add(new Point(p.x + delta, p.y - delta));
 			points.add(new Point(p.x - delta, p.y - delta));

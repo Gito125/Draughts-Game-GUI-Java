@@ -1,7 +1,18 @@
-/* Name: CheckersWindow
- * Author: Devon McGrath
- * Description: This class is a window that is used to play a game of checkers.
- * It also contains a component to change the game options.
+/*
+ * ============================================================================
+ * File:        CheckersWindow.java
+ * Package:     ui
+ * Authors:     Group 3 — Precious, Gideon, Peter
+ *              (Original Author: Devon McGrath)
+ * Course:      Data Structures and Algorithms (2205 ST) — Y2T2
+ * 
+ * Description: Top-level Swing JFrame window hosting the CheckerBoard display
+ *              component and OptionPanel control panel.
+ *
+ * DSA Concepts Applied:
+ *   - Intro To DSA (Intro To DSA.pptx): Software design modularity, separating
+ *     GUI layout components from core model state and logic engines.
+ * ============================================================================
  */
 
 package ui;
@@ -12,80 +23,81 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import model.Player;
-import network.CheckersNetworkHandler;
-import network.ConnectionListener;
-import network.Session;
 
 /**
- * The {@code CheckersWindow} class is responsible for managing a window. This
- * window contains a game of checkers and also options to change the settings
- * of the game with an {@link OptionPanel}.
+ * The {@code CheckersWindow} class manages the main application GUI window.
  */
 public class CheckersWindow extends JFrame {
 
 	private static final long serialVersionUID = 8782122389400590079L;
 	
-	/** The default width for the checkers window. */
+	/** Default window width (pixels). */
 	public static final int DEFAULT_WIDTH = 500;
 	
-	/** The default height for the checkers window. */
-	public static final int DEFAULT_HEIGHT = 600;
+	/** Default window height (pixels). */
+	public static final int DEFAULT_HEIGHT = 640;
 	
-	/** The default title for the checkers window. */
-	public static final String DEFAULT_TITLE = "Java Checkers";
+	/** Application title string. */
+	public static final String DEFAULT_TITLE = "Java Checkers - Group 3";
 	
-	/** The checker board component playing the updatable game. */
+	/** Checkerboard GUI board component. */
 	private CheckerBoard board;
 	
+	/** Control options panel component. */
 	private OptionPanel opts;
 	
-	private Session session1;
-	
-	private Session session2;
-	
+	/**
+	 * Default constructor initializing window with standard dimensions and title.
+	 */
 	public CheckersWindow() {
 		this(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_TITLE);
 	}
 	
+	/**
+	 * Constructor initializing window with specific starting players.
+	 * 
+	 * @param player1 Black player instance
+	 * @param player2 White player instance
+	 */
 	public CheckersWindow(Player player1, Player player2) {
 		this();
 		setPlayer1(player1);
 		setPlayer2(player2);
 	}
 	
+	/**
+	 * Constructor initializing window dimensions and title.
+	 * 
+	 * @param width  window width
+	 * @param height window height
+	 * @param title  window title
+	 */
 	public CheckersWindow(int width, int height, String title) {
-		
-		// Setup the window
 		super(title);
 		super.setSize(width, height);
 		super.setLocationByPlatform(true);
 		
-		// Setup the components
 		JPanel layout = new JPanel(new BorderLayout());
 		this.board = new CheckerBoard(this);
 		this.opts = new OptionPanel(this);
+		
 		layout.add(board, BorderLayout.CENTER);
 		layout.add(opts, BorderLayout.SOUTH);
 		this.add(layout);
-		
-		// Setup the network listeners
-		CheckersNetworkHandler session1Handler, session2Handler;
-		session1Handler = new CheckersNetworkHandler(true, this, board, opts);
-		session2Handler = new CheckersNetworkHandler(false, this, board, opts);
-		this.session1 = new Session(new ConnectionListener(
-				0, session1Handler), null, null, -1);
-		this.session2 = new Session(new ConnectionListener(
-				0, session2Handler), null, null, -1);
 	}
 	
 	public CheckerBoard getBoard() {
 		return board;
 	}
 
+	public OptionPanel getOptionPanel() {
+		return opts;
+	}
+
 	/**
-	 * Updates the type of player that is being used for player 1.
+	 * Updates the Player 1 controller.
 	 * 
-	 * @param player1	the new player instance to control player 1.
+	 * @param player1 new Player instance
 	 */
 	public void setPlayer1(Player player1) {
 		this.board.setPlayer1(player1);
@@ -93,9 +105,9 @@ public class CheckersWindow extends JFrame {
 	}
 	
 	/**
-	 * Updates the type of player that is being used for player 2.
+	 * Updates the Player 2 controller.
 	 * 
-	 * @param player2	the new player instance to control player 2.
+	 * @param player2 new Player instance
 	 */
 	public void setPlayer2(Player player2) {
 		this.board.setPlayer2(player2);
@@ -103,7 +115,7 @@ public class CheckersWindow extends JFrame {
 	}
 	
 	/**
-	 * Resets the game of checkers in the window.
+	 * Resets the checkers game to starting state.
 	 */
 	public void restart() {
 		this.board.getGame().restart();
@@ -112,13 +124,5 @@ public class CheckersWindow extends JFrame {
 	
 	public void setGameState(String state) {
 		this.board.getGame().setGameState(state);
-	}
-	
-	public Session getSession1() {
-		return session1;
-	}
-
-	public Session getSession2() {
-		return session2;
 	}
 }

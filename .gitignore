@@ -1,0 +1,11 @@
+# Compiled Java Class Files
+*.class
+
+# Package Files
+*.jar
+
+# Build and Output Directories
+bin/
+build/
+out/
+target/

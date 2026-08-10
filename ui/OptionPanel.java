@@ -1,7 +1,20 @@
-/* Name: OptionPanel
- * Author: Devon McGrath
- * Description: This class is a user interface to interact with a checkers
- * game window.
+/*
+ * ============================================================================
+ * File:        OptionPanel.java
+ * Package:     ui
+ * Authors:     Group 3 — Precious, Gideon, Peter
+ *              (Original Author: Devon McGrath)
+ * Course:      Data Structures and Algorithms (2205 ST) — Y2T2
+ * 
+ * Description: User interface control panel allowing players to restart games,
+ *              select player controllers (Human vs Computer), set AI difficulty
+ *              levels (Easy, Medium, Hard), and adjust dynamic move delay speed.
+ *
+ * DSA Concepts Applied:
+ *   - Queues (Queues.pptx): Event queue handling for Swing UI ActionListeners.
+ *   - Intro To DSA (Intro To DSA.pptx): User interface abstraction and dynamic
+ *     component visibility management.
+ * ============================================================================
  */
 
 package ui;
@@ -15,92 +28,116 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import model.ComputerPlayer;
+import model.ComputerPlayer.Difficulty;
 import model.HumanPlayer;
-import model.NetworkPlayer;
 import model.Player;
-import network.CheckersNetworkHandler;
-import network.Command;
-import network.ConnectionListener;
-import network.Session;
 
 /**
- * The {@code OptionPanel} class provides a user interface component to control
- * options for the game of checkers being played in the window.
+ * The {@code OptionPanel} class provides Swing controls for configuring draughts game settings,
+ * including controller types, AI difficulty levels, and game execution speed.
  */
 public class OptionPanel extends JPanel {
 
 	private static final long serialVersionUID = -4763875452164030755L;
 
-	/** The checkers window to update when an option is changed. */
+	/** Parent CheckersWindow reference. */
 	private CheckersWindow window;
 	
-	/** The button that when clicked, restarts the game. */
+	/** Button to restart game session. */
 	private JButton restartBtn;
 	
-	/** The combo box that changes what type of player player 1 is. */
+	/** Player 1 controller selection combo box ("Human", "Computer"). */
 	private JComboBox<String> player1Opts;
 	
-	/** The network options for player 1. */
-	private NetworkWindow player1Net;
-	
-	/** The button to perform an action based on the type of player. */
-	private JButton player1Btn;
+	/** Player 1 AI difficulty combo box ("Easy", "Medium", "Hard"). */
+	private JComboBox<String> player1Diff;
 
-	/** The combo box that changes what type of player player 2 is. */
+	/** Player 2 controller selection combo box ("Human", "Computer"). */
 	private JComboBox<String> player2Opts;
 
-	/** The network options for player 2. */
-	private NetworkWindow player2Net;
+	/** Player 2 AI difficulty combo box ("Easy", "Medium", "Hard"). */
+	private JComboBox<String> player2Diff;
 	
-	/** The button to perform an action based on the type of player. */
-	private JButton player2Btn;
+	/** Slider controlling AI turn delay in milliseconds (200ms to 3000ms). */
+	private JSlider speedSlider;
+
+	/** Label displaying current speed slider delay value. */
+	private JLabel speedLabel;
 	
 	/**
-	 * Creates a new option panel for the specified checkers window.
+	 * Constructs a new OptionPanel for the specified window.
 	 * 
-	 * @param window	the window with the game of checkers to update.
+	 * @param window parent window
 	 */
 	public OptionPanel(CheckersWindow window) {
 		super(new GridLayout(0, 1));
-		
 		this.window = window;
 		
-		// Initialize the components
 		OptionListener ol = new OptionListener();
-		final String[] playerTypeOpts = {"Human", "Computer", "Network"};
+		final String[] playerTypeOpts = {"Human", "Computer"};
+		final String[] diffOpts = {"Easy", "Medium", "Hard"};
+
 		this.restartBtn = new JButton("Restart");
+		this.restartBtn.addActionListener(ol);
+
 		this.player1Opts = new JComboBox<>(playerTypeOpts);
 		this.player2Opts = new JComboBox<>(playerTypeOpts);
-		this.restartBtn.addActionListener(ol);
 		this.player1Opts.addActionListener(ol);
 		this.player2Opts.addActionListener(ol);
+
+		this.player1Diff = new JComboBox<>(diffOpts);
+		this.player2Diff = new JComboBox<>(diffOpts);
+		this.player1Diff.setSelectedItem("Medium");
+		this.player2Diff.setSelectedItem("Medium");
+		this.player1Diff.addActionListener(ol);
+		this.player2Diff.addActionListener(ol);
+		this.player1Diff.setVisible(false);
+		this.player2Diff.setVisible(false);
+
+		// Speed slider setup: 200ms (fast) to 3000ms (slow), default 1000ms
+		this.speedSlider = new JSlider(JSlider.HORIZONTAL, 200, 3000, 1000);
+		this.speedLabel = new JLabel("Speed: 1.0s");
+		this.speedSlider.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				int delay = speedSlider.getValue();
+				speedLabel.setText(String.format("Speed: %.1fs", delay / 1000.0));
+				if (OptionPanel.this.window != null && OptionPanel.this.window.getBoard() != null) {
+					OptionPanel.this.window.getBoard().setTimerDelay(delay);
+				}
+			}
+		});
+
 		JPanel top = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		JPanel middle = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JPanel bottom = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		this.player1Net = new NetworkWindow(ol);
-		this.player1Net.setTitle("Player 1 - Configure Network");
-		this.player2Net = new NetworkWindow(ol);
-		this.player2Net.setTitle("Player 2 - Configure Network");
-		this.player1Btn = new JButton("Set Connection");
-		this.player1Btn.addActionListener(ol);
-		this.player1Btn.setVisible(false);
-		this.player2Btn = new JButton("Set Connection");
-		this.player2Btn.addActionListener(ol);
-		this.player2Btn.setVisible(false);
-		
-		// Add components to the layout
+		JPanel speedPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+
 		top.add(restartBtn);
-		middle.add(new JLabel("(black) Player 1: "));
+		
+		middle.add(new JLabel("(black) P1: "));
 		middle.add(player1Opts);
-		middle.add(player1Btn);
-		bottom.add(new JLabel("(white) Player 2: "));
+		middle.add(new JLabel("AI: "));
+		middle.add(player1Diff);
+
+		bottom.add(new JLabel("(white) P2: "));
 		bottom.add(player2Opts);
-		bottom.add(player2Btn);
+		bottom.add(new JLabel("AI: "));
+		bottom.add(player2Diff);
+
+		speedPanel.add(new JLabel("AI Speed: "));
+		speedPanel.add(speedSlider);
+		speedPanel.add(speedLabel);
+
 		this.add(top);
 		this.add(middle);
 		this.add(bottom);
+		this.add(speedPanel);
 	}
 
 	public CheckersWindow getWindow() {
@@ -110,223 +147,62 @@ public class OptionPanel extends JPanel {
 	public void setWindow(CheckersWindow window) {
 		this.window = window;
 	}
-	
-	public void setNetworkWindowMessage(boolean forPlayer1, String msg) {
-		if (forPlayer1) {
-			this.player1Net.setMessage(msg);
-		} else {
-			this.player2Net.setMessage(msg);
-		}
-	}
-	
-	public NetworkWindow getNetworkWindow1() {
-		return player1Net;
-	}
-	
-	public NetworkWindow getNetworkWindow2() {
-		return player2Net;
-	}
-	
-	private void handleNetworkUpdate(NetworkWindow win, ActionEvent e) {
-		
-		if (win == null || window == null || e == null) {
-			return;
-		}
-		
-		// Get the info
-		int srcPort = win.getSourcePort(), destPort = win.getDestinationPort();
-		String destHost = win.getDestinationHost();
-		boolean isPlayer1 = (win == player1Net);
-		Session s = (isPlayer1? window.getSession1() : window.getSession2());
-		
-		// Setting new port to listen on
-		if (e.getID() == NetworkWindow.LISTEN_BUTTON) {
-			
-			// Validate the port
-			if (srcPort < 1025 || srcPort > 65535) {
-				win.setMessage("  Error: source port must be"
-						+ " between 1025 and 65535. ");
-				return;
-			}
-			if (!ConnectionListener.available(srcPort)) {
-				win.setMessage("  Error: source port " + srcPort+ " is not available.");
-				return;
-			}
-			
-			// Update the server if necessary
-			if (s.getListener().getPort() != srcPort) {
-				s.getListener().stopListening();
-			}
-			s.getListener().setPort(srcPort);
-			s.getListener().listen();
-			win.setMessage("  This client is listening on port " + srcPort);
-			win.setCanUpdateListen(false);
-			win.setCanUpdateConnect(true);
-		}
-		
-		// Try to connect
-		else if (e.getID() == NetworkWindow.CONNECT_BUTTON) {
-			
-			// Validate the port and host
-			if (destPort < 1025 || destPort > 65535) {
-				win.setMessage("  Error: destination port must be "
-						+ "between 1025 and 65535. ");
-				return;
-			}
-			if (destHost == null || destHost.isEmpty()) {
-				destHost = "127.0.0.1";
-			}
-			
-			// Connect to the proposed host
-			Command connect = new Command(Command.COMMAND_CONNECT,
-					win.getSourcePort() + "", isPlayer1? "1" : "0");
-			String response = connect.send(destHost, destPort);
-			
-			// No response
-			if (response.isEmpty()) {
-				win.setMessage("  Error: could not connect to " + destHost +
-						":" + destPort + ".");
-			}
-			
-			// It was a valid client, but refused to connect
-			else if (response.startsWith(CheckersNetworkHandler.RESPONSE_DENIED)) {
-				String[] lines = response.split("\n");
-				String errMsg = lines.length > 1? lines[1] : "";
-				if (errMsg.isEmpty()) {
-					win.setMessage("  Error: the other client refused to connect.");
-				} else {
-					win.setMessage("  " + errMsg);
-				}
-			}
-			
-			// The connection was accepted by the checkers client
-			else if (response.startsWith(CheckersNetworkHandler.RESPONSE_ACCEPTED)){
-				
-				// Update the session
-				s.setDestinationHost(destHost);
-				s.setDestinationPort(destPort);
-				win.setMessage("  Successfully started a session with " +
-						destHost + ":" + destPort + ".");
-				win.setCanUpdateConnect(false);
-								
-				// Update the SID
-				String[] lines = response.split("\n");
-				String sid = lines.length > 1? lines[1] : "";
-				s.setSid(sid);
-				
-				// Get the new game state
-				Command get = new Command(Command.COMMAND_GET, sid, null);
-				response = get.send(destHost, destPort);
-				lines = response.split("\n");
-				String state = lines.length > 1? lines[1] : "";
-				window.setGameState(state);
-			}
-			
-			// General error, maybe the user tried a web server and
-			// the response is an HTTP response
-			else {
-				win.setMessage("  Error: you tried to connect to a host and "
-						+ "port that isn't running a checkers client.");
-			}
-		}
-	}
-	
+
 	/**
-	 * Gets a new instance of the type of player selected for the specified
-	 * combo box.
+	 * Instantiates a new Player object based on selection boxes.
 	 * 
-	 * @param playerOpts	the combo box with the player options.
-	 * @return a new instance of a {@link model.Player} object that corresponds
-	 * with the type of player selected.
+	 * @param playerOpts controller selection box
+	 * @param diffOpts   difficulty selection box
+	 * @return Player instance (HumanPlayer or ComputerPlayer)
 	 */
-	private static Player getPlayer(JComboBox<String> playerOpts) {
-		
-		Player player = new HumanPlayer();
+	private static Player getPlayer(JComboBox<String> playerOpts, JComboBox<String> diffOpts) {
 		if (playerOpts == null) {
-			return player;
+			return new HumanPlayer();
 		}
 		
-		// Determine the type
 		String type = "" + playerOpts.getSelectedItem();
 		if (type.equals("Computer")) {
-			player = new ComputerPlayer();
-		} else if (type.equals("Network")) {
-			player = new NetworkPlayer();
+			Difficulty diff = Difficulty.MEDIUM;
+			if (diffOpts != null) {
+				String sel = "" + diffOpts.getSelectedItem();
+				if (sel.equals("Easy")) diff = Difficulty.EASY;
+				else if (sel.equals("Hard")) diff = Difficulty.HARD;
+			}
+			return new ComputerPlayer(diff);
 		}
 		
-		return player;
+		return new HumanPlayer();
 	}
 	
 	/**
-	 * The {@code OptionListener} class responds to the components within the
-	 * option panel when they are clicked/updated.
+	 * ActionListener responding to component selection events.
 	 */
 	private class OptionListener implements ActionListener {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			
-			// No window to update
 			if (window == null) {
 				return;
 			}
 			
 			Object src = e.getSource();
 
-			// Handle the user action
-			JButton btn = null;
-			boolean isNetwork = false, isP1 = true;
-			Session s = null;
 			if (src == restartBtn) {
 				window.restart();
-				window.getBoard().updateNetwork();
-			} else if (src == player1Opts) {
-				Player player = getPlayer(player1Opts);
+			} else if (src == player1Opts || src == player1Diff) {
+				boolean isComp = "Computer".equals(player1Opts.getSelectedItem());
+				player1Diff.setVisible(isComp);
+				Player player = getPlayer(player1Opts, player1Diff);
 				window.setPlayer1(player);
-				isNetwork = (player instanceof NetworkPlayer);
-				btn = player1Btn;
-				s = window.getSession1();
-			} else if (src == player2Opts) {
-				Player player = getPlayer(player2Opts);
+				revalidate();
+				repaint();
+			} else if (src == player2Opts || src == player2Diff) {
+				boolean isComp = "Computer".equals(player2Opts.getSelectedItem());
+				player2Diff.setVisible(isComp);
+				Player player = getPlayer(player2Opts, player2Diff);
 				window.setPlayer2(player);
-				isNetwork = (player instanceof NetworkPlayer);
-				btn = player2Btn;
-				s = window.getSession2();
-				isP1 = false;
-			} else if (src == player1Btn) {
-				player1Net.setVisible(true);
-			} else if (src == player2Btn) {
-				player2Net.setVisible(true);
-			}
-			
-			// Handle a network update
-			else if (src == player1Net || src == player2Net) {
-				handleNetworkUpdate((NetworkWindow) src, e);
-			}
-			
-			// Update UI
-			if (btn != null) {
-				
-				// Disconnect if required
-				String sid = s.getSid();
-				if (!isNetwork && btn.isVisible() &&
-						sid != null && !sid.isEmpty()) {
-					
-					// Send the request
-					Command disconnect = new Command(
-							Command.COMMAND_DISCONNECT, sid);
-					disconnect.send(
-							s.getDestinationHost(), s.getDestinationPort());
-					
-					// Update the session
-					s.setSid(null);
-					NetworkWindow win = isP1? player1Net : player2Net;
-					win.setCanUpdateConnect(true);
-				}
-				
-				// Update the UI
-				btn.setVisible(isNetwork);
-				btn.repaint();
+				revalidate();
+				repaint();
 			}
 		}
 	}

@@ -1,6 +1,21 @@
-/* Name: MoveLogic
- * Author: Devon McGrath
- * Description: This class simply validates moves.
+/*
+ * ============================================================================
+ * File:        MoveLogic.java
+ * Package:     logic
+ * Authors:     Group 3 — Precious, Gideon, Peter
+ *              (Original Author: Devon McGrath)
+ * Course:      Data Structures and Algorithms (2205 ST) — Y2T2
+ * 
+ * Description: Rule engine for validating legal moves in accordance with official
+ *              draughts rules, enforcing mandatory capture jumps, diagonal movement,
+ *              king promotion rules, and multi-jump turn locks.
+ *
+ * DSA Concepts Applied:
+ *   - Graphs (Graphs.pptx): Validates directed edge movements between 32 tile nodes.
+ *   - Trees (Trees in DSA.pptx): Prunes illegal move branches during game tree search.
+ *   - Mathematical Background (Mathematical Background DSA.pptx): Manhattan vector
+ *     distance calculations (|dx| == |dy|) for diagonal movement verification.
+ * ============================================================================
  */
 
 package logic;
@@ -13,43 +28,38 @@ import model.Board;
 import model.Game;
 
 /**
- * The {@code MoveLogic} class determines what a valid move is. It fully
- * implements all the rules of checkers.
+ * The {@code MoveLogic} class enforces all official draughts rules and move validity checks.
  */
 public class MoveLogic {
 
 	/**
-	 * Determines if the specified move is valid based on the rules of checkers.
+	 * Determines if a proposed move in the current game state is legal.
 	 * 
-	 * @param game			the game to check against.
-	 * @param startIndex	the start index of the move.
-	 * @param endIndex		the end index of the move.
-	 * @return true if the move is legal according to the rules of checkers.
-	 * @see {@link #isValidMove(Board, boolean, int, int, int)}
+	 * @param game       game instance
+	 * @param startIndex start tile index (0 to 31)
+	 * @param endIndex   end tile index (0 to 31)
+	 * @return true if move is valid under draughts rules
 	 */
-	public static boolean isValidMove(Game game,
-			int startIndex, int endIndex) {
-		return game == null? false : isValidMove(game.getBoard(),
-				game.isP1Turn(), startIndex, endIndex, game.getSkipIndex());
+	public static boolean isValidMove(Game game, int startIndex, int endIndex) {
+		return game != null && isValidMove(game.getBoard(), game.isP1Turn(), startIndex, endIndex, game.getSkipIndex());
 	}
 	
 	/**
-	 * Determines if the specified move is valid based on the rules of checkers.
+	 * Determines if a proposed move is legal given board state, turn player, and multi-jump lock state.
 	 * 
-	 * @param board			the current board to check against.
-	 * @param isP1Turn		the flag indicating if it is player 1's turn.
-	 * @param startIndex	the start index of the move.
-	 * @param endIndex		the end index of the move.
-	 * @param skipIndex		the index of the last skip this turn.
-	 * @return true if the move is legal according to the rules of checkers.
-	 * @see {@link #isValidMove(Game, int, int)}
+	 * <p><b>DSA Reference (Trees in DSA.pptx / Graphs.pptx):</b>
+	 * Validates edge transitions between state tree nodes, ensuring turn locks and forced captures.</p>
+	 * 
+	 * @param board      current board state
+	 * @param isP1Turn   true if Player 1 (Black) turn, false if Player 2 (White) turn
+	 * @param startIndex start tile index
+	 * @param endIndex   end tile index
+	 * @param skipIndex  index of piece locked in multi-jump (-1 if no lock)
+	 * @return true if move complies with all rules
+	 * @complexity O(p) where p is total number of active player pieces checked for forced captures
 	 */
-	public static boolean isValidMove(Board board, boolean isP1Turn,
-			int startIndex, int endIndex, int skipIndex) {
-		
-		// Basic checks
-		if (board == null || !Board.isValidIndex(startIndex) ||
-				!Board.isValidIndex(endIndex)) {
+	public static boolean isValidMove(Board board, boolean isP1Turn, int startIndex, int endIndex, int skipIndex) {
+		if (board == null || !Board.isValidIndex(startIndex) || !Board.isValidIndex(endIndex)) {
 			return false;
 		} else if (startIndex == endIndex) {
 			return false;
@@ -57,91 +67,76 @@ public class MoveLogic {
 			return false;
 		}
 		
-		// Perform the tests to validate the move
 		if (!validateIDs(board, isP1Turn, startIndex, endIndex)) {
 			return false;
 		} else if (!validateDistance(board, isP1Turn, startIndex, endIndex)) {
 			return false;
 		}
 		
-		// Passed all tests
 		return true;
 	}
 	
 	/**
-	 * Validates all ID related values for the start, end, and middle (if the
-	 * move is a skip).
+	 * Validates piece ownership and target tile vacancy.
 	 * 
-	 * @param board			the current board to check against.
-	 * @param isP1Turn		the flag indicating if it is player 1's turn.
-	 * @param startIndex	the start index of the move.
-	 * @param endIndex		the end index of the move.
-	 * @return true if and only if all IDs are valid.
+	 * @param board      board state
+	 * @param isP1Turn   turn flag
+	 * @param startIndex start index
+	 * @param endIndex   end index
+	 * @return true if piece IDs and target square match turn rules
 	 */
-	private static boolean validateIDs(Board board, boolean isP1Turn,
-			int startIndex, int endIndex) {
-		
-		// Check if end is clear
+	private static boolean validateIDs(Board board, boolean isP1Turn, int startIndex, int endIndex) {
 		if (board.get(endIndex) != Board.EMPTY) {
 			return false;
 		}
 		
-		// Check if proper ID
 		int id = board.get(startIndex);
-		if ((isP1Turn && !Board.isBlackChecker(id))
-				|| (!isP1Turn && !Board.isWhiteChecker(id))) {
+		if ((isP1Turn && !Board.isBlackChecker(id)) || (!isP1Turn && !Board.isWhiteChecker(id))) {
 			return false;
 		}
 		
-		// Check the middle
 		Point middle = Board.middle(startIndex, endIndex);
 		int midID = board.get(Board.toIndex(middle));
-		if (midID != Board.INVALID && ((!isP1Turn &&
-				!Board.isBlackChecker(midID)) ||
-				(isP1Turn && !Board.isWhiteChecker(midID)))) {
+		if (midID != Board.INVALID && ((!isP1Turn && !Board.isBlackChecker(midID)) || (isP1Turn && !Board.isWhiteChecker(midID)))) {
 			return false;
 		}
 		
-		// Passed all tests
 		return true;
 	}
 	
 	/**
-	 * Checks that the move is diagonal and magnitude 1 or 2 in the correct
-	 * direction. If the magnitude is not 2 (i.e. not a skip), it checks that
-	 * no skips are available by other checkers of the same player.
+	 * Validates diagonal movement vectors and enforces mandatory capture jumps.
 	 * 
-	 * @param board			the current board to check against.
-	 * @param isP1Turn		the flag indicating if it is player 1's turn.
-	 * @param startIndex	the start index of the move.
-	 * @param endIndex		the end index of the move.
-	 * @return true if and only if the move distance is valid.
+	 * <p><b>DSA Reference (Mathematical Background DSA.pptx):</b>
+	 * Checks geometric vector offsets |dx| == |dy| for diagonal movement and enforces
+	 * mandatory capture rule: if any piece can jump, normal 1-step moves are prohibited.</p>
+	 * 
+	 * @param board      board state
+	 * @param isP1Turn   turn flag
+	 * @param startIndex start index
+	 * @param endIndex   end index
+	 * @return true if distance vector and forced capture rules pass
 	 */
-	private static boolean validateDistance(Board board, boolean isP1Turn,
-			int startIndex, int endIndex) {
-		
-		// Check that it was a diagonal move
+	private static boolean validateDistance(Board board, boolean isP1Turn, int startIndex, int endIndex) {
 		Point start = Board.toPoint(startIndex);
 		Point end = Board.toPoint(endIndex);
 		int dx = end.x - start.x;
 		int dy = end.y - start.y;
+		
 		if (Math.abs(dx) != Math.abs(dy) || Math.abs(dx) > 2 || dx == 0) {
 			return false;
 		}
 		
-		// Check that it was in the right direction
 		int id = board.get(startIndex);
-		if ((id == Board.WHITE_CHECKER && dy > 0) ||
-				(id == Board.BLACK_CHECKER && dy < 0)) {
+		if ((id == Board.WHITE_CHECKER && dy > 0) || (id == Board.BLACK_CHECKER && dy < 0)) {
 			return false;
 		}
 		
-		// Check that if this is not a skip, there are none available
 		Point middle = Board.middle(startIndex, endIndex);
 		int midID = board.get(Board.toIndex(middle));
+		
+		// If attempting a normal 1-step move (midID < 0), check if any of player's pieces can jump
 		if (midID < 0) {
-			
-			// Get the correct checkers
 			List<Point> checkers;
 			if (isP1Turn) {
 				checkers = board.find(Board.BLACK_CHECKER);
@@ -151,7 +146,7 @@ public class MoveLogic {
 				checkers.addAll(board.find(Board.WHITE_KING));
 			}
 			
-			// Check if any of them have a skip available
+			// If a capture jump is available anywhere for this player, normal moves are invalid
 			for (Point p : checkers) {
 				int index = Board.toIndex(p);
 				if (!MoveGenerator.getSkips(board, index).isEmpty()) {
@@ -160,21 +155,17 @@ public class MoveLogic {
 			}
 		}
 		
-		// Passed all tests
 		return true;
 	}
 	
 	/**
-	 * Checks if the specified checker is safe (i.e. the opponent cannot skip
-	 * the checker).
+	 * Evaluates whether a piece at a specified position is currently safe from opponent captures.
 	 * 
-	 * @param board		the current board state.
-	 * @param checker	the point where the test checker is located at.
-	 * @return true if and only if the checker at the point is safe.
+	 * @param board   board state
+	 * @param checker piece position
+	 * @return true if no enemy piece can capture this piece on the next turn
 	 */
 	public static boolean isSafe(Board board, Point checker) {
-		
-		// Trivial cases
 		if (board == null || checker == null) {
 			return true;
 		}
@@ -187,26 +178,23 @@ public class MoveLogic {
 			return true;
 		}
 		
-		// Determine if it can be skipped
 		boolean isBlack = Board.isBlackChecker(id);
 		List<Point> check = new ArrayList<>();
 		MoveGenerator.addPoints(check, checker, Board.BLACK_KING, 1);
+		
 		for (Point p : check) {
 			int start = Board.toIndex(p);
 			int tid = board.get(start);
 			
-			// Nothing here
 			if (tid == Board.EMPTY || tid == Board.INVALID) {
 				continue;
 			}
 			
-			// Check ID
 			boolean isWhite = Board.isWhiteChecker(tid);
 			if (isBlack && !isWhite) {
 				continue;
 			}
 			
-			// Determine if valid skip direction
 			int dx = (checker.x - p.x) * 2;
 			int dy = (checker.y - p.y) * 2;
 			if (!Board.isKingChecker(tid) && (isWhite ^ (dy < 0))) {
