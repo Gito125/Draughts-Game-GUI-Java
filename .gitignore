@@ -9,3 +9,6 @@ bin/
 build/
 out/
 target/
+
+# Temporary Files
+/temp/
