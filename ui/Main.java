@@ -6,7 +6,7 @@
  *              (Original Author: Devon McGrath)
  * Course:      Data Structures and Algorithms (2205 ST) — Y2T2
  * 
- * Description: Entry point for the Draughts GUI application. Configures System
+ * Description: Entry point for the Draft GUI application. Configures System
  *              Look-and-Feel and instantiates the main CheckersWindow GUI.
  *
  * DSA Concepts Applied:

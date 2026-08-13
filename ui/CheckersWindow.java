@@ -34,7 +34,7 @@ public class CheckersWindow extends JFrame {
 	public static final int DEFAULT_HEIGHT = 600;
 	
 	/** Application title string. */
-	public static final String DEFAULT_TITLE = "Drafts or Draughts (Checkers) Game";
+	public static final String DEFAULT_TITLE = "Draft Game";
 	
 	/** Checkerboard GUI board component. */
 	private CheckerBoard board;

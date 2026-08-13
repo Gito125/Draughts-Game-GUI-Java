@@ -7,7 +7,7 @@
  * Course:      Data Structures and Algorithms
  * 
  * Description: Rule engine for validating legal moves in accordance with official
- *              draughts rules, enforcing mandatory capture jumps, diagonal movement,
+ *              draft rules, enforcing mandatory capture jumps, diagonal movement,
  *              king promotion rules, and multi-jump turn locks.
  *
  * DSA Concepts Applied:
@@ -26,7 +26,7 @@ import model.Board;
 import model.Game;
 
 /**
- * The {@code MoveLogic} class enforces all official draughts rules and move validity checks.
+ * The {@code MoveLogic} class enforces all official draft rules and move validity checks.
  */
 public class MoveLogic {
 
@@ -36,7 +36,7 @@ public class MoveLogic {
 	 * @param game       game instance
 	 * @param startIndex start tile index (0 to 31)
 	 * @param endIndex   end tile index (0 to 31)
-	 * @return true if move is valid under draughts rules
+	 * @return true if move is valid under draft rules
 	 */
 	public static boolean isValidMove(Game game, int startIndex, int endIndex) {
 		return game != null && isValidMove(game.getBoard(), game.isP1Turn(), startIndex, endIndex, game.getSkipIndex());
