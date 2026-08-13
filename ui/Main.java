@@ -4,10 +4,7 @@
  * Package:     ui
  * Authors:     Group 3 — Precious, Gideon, Peter
  *              
- * Course:      Data Structures and Algorithms (2205 ST) — Y2T2
- * 
- * Description: Entry point for the Draft GUI application. Configures System
- *              Look-and-Feel and instantiates the main CheckersWindow GUI.
+ * Main entry point for the draft application.
  * ============================================================================
  */
 
