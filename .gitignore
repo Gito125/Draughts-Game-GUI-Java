@@ -12,3 +12,6 @@ target/
 
 # Temporary Files
 /temp/
+
+# IDE Files
+/.vscode/
