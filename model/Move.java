@@ -3,7 +3,7 @@
  * File:        Move.java
  * Package:     model
  * Authors:     Group 3 — Precious, Gideon, Peter
- *              (Original Author: Devon McGrath)
+ *              
  * Course:      Data Structures and Algorithms
  * 
  * Description: Represents a single move operation on the checkerboard, storing

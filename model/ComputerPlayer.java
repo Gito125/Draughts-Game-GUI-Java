@@ -3,10 +3,10 @@
  * File:        ComputerPlayer.java
  * Package:     model
  * Authors:     Group 3 — Precious, Gideon, Peter
- *              (Original Author: Devon McGrath)
+ *              
  * Course:      Data Structures and Algorithms
  * 
- * Description: Implements the AI opponent for Draft using Minimax game tree search
+ * Description: Implements the AI/Computer opponent for Draft using Minimax game tree search
  *              at a fixed depth of 3 with material-count heuristic evaluation.
  *
  * DSA Concepts Applied:

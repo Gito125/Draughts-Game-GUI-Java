@@ -3,14 +3,11 @@
  * File:        CheckersWindow.java
  * Package:     ui
  * Authors:     Group 3 — Precious, Gideon, Peter
- *              (Original Author: Devon McGrath)
+ *              
  * Course:      Data Structures and Algorithms
  * 
  * Description: Top-level Swing JFrame window hosting the CheckerBoard display
  *              component and OptionPanel control panel.
- *
- * DSA Concepts Applied:
- *   - Software Modularity: Separates GUI window shell from core game components.
  * ============================================================================
  */
 

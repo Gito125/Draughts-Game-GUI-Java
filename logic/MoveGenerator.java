@@ -3,7 +3,7 @@
  * File:        MoveGenerator.java
  * Package:     logic
  * Authors:     Group 3 — Precious, Gideon, Peter
- *              (Original Author: Devon McGrath)
+ *              
  * Course:      Data Structures and Algorithms
  * 
  * Description: Generates legal single-step move destination coordinates and multi-step

@@ -3,7 +3,7 @@
  * File:        OptionPanel.java
  * Package:     ui
  * Authors:     Group 3 — Precious, Gideon, Peter
- *              (Original Author: Devon McGrath)
+ *              
  * Course:      Data Structures and Algorithms
  * 
  * Description: User interface control panel allowing players to start/restart games

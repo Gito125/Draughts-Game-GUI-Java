@@ -3,7 +3,7 @@
  * File:        Board.java
  * Package:     model
  * Authors:     Group 3 — Precious, Gideon, Peter
- *              (Original Author: Devon McGrath)
+ *              
  * Course:      Data Structures and Algorithms
  * 
  * Description: Clean, 32-element array representation of an 8x8 checkerboard. Checkers

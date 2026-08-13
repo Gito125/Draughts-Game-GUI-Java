@@ -3,7 +3,6 @@
  * File:        CheckerBoard.java
  * Package:     ui
  * Authors:     Group 3 — Precious, Gideon, Peter
- *              (Original Author: Devon McGrath)
  * Course:      Data Structures and Algorithms
  * 
  * Description: Swing GUI component rendering the 8x8 draft board, piece graphics,
@@ -12,8 +11,8 @@
  *              for automated computer AI players.
  *
  * DSA Concepts Applied:
- *   - Graph Visualization: Visualizes the 32-tile graph board layout and renders movement path vectors.
- *   - Event Dispatch Queue: Uses Swing Timer event dispatching for non-blocking AI turns.
+ *   - Graph Visualization: Visualizes the 32-tile graph board layout and renders movement paths.
+ *   - Event Dispatch Queue: Uses Swing Timer event dispatching for non-blocking AI/Computer turns.
  *   - UI Separation: GUI view rendering separated from state logic.
  * ============================================================================
  */

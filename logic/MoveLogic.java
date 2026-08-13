@@ -3,7 +3,7 @@
  * File:        MoveLogic.java
  * Package:     logic
  * Authors:     Group 3 — Precious, Gideon, Peter
- *              (Original Author: Devon McGrath)
+ *              
  * Course:      Data Structures and Algorithms
  * 
  * Description: Rule engine for validating legal moves in accordance with official
