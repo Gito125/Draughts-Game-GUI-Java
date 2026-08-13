@@ -4,14 +4,13 @@
  * Package:     ui
  * Authors:     Group 3 — Precious, Gideon, Peter
  *              (Original Author: Devon McGrath)
- * Course:      Data Structures and Algorithms (2205 ST) — Y2T2
+ * Course:      Data Structures and Algorithms
  * 
  * Description: Top-level Swing JFrame window hosting the CheckerBoard display
  *              component and OptionPanel control panel.
  *
  * DSA Concepts Applied:
- *   - Intro To DSA (Intro To DSA.pptx): Software design modularity, separating
- *     GUI layout components from core model state and logic engines.
+ *   - Software Modularity: Separates GUI window shell from core game components.
  * ============================================================================
  */
 
@@ -20,7 +19,6 @@ package ui;
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import model.Player;
 
 /**
  * The {@code CheckersWindow} class manages the main application GUI window.
@@ -33,7 +31,7 @@ public class CheckersWindow extends JFrame {
 	public static final int DEFAULT_WIDTH = 500;
 	
 	/** Default window height (pixels). */
-	public static final int DEFAULT_HEIGHT = 640;
+	public static final int DEFAULT_HEIGHT = 600;
 	
 	/** Application title string. */
 	public static final String DEFAULT_TITLE = "Drafts or Draughts (Checkers) Game";
@@ -52,15 +50,15 @@ public class CheckersWindow extends JFrame {
 	}
 	
 	/**
-	 * Constructor initializing window with specific starting players.
+	 * Constructor initializing window with specific player types.
 	 * 
-	 * @param player1 Black player instance
-	 * @param player2 White player instance
+	 * @param p1IsComputer true if P1 is Computer AI
+	 * @param p2IsComputer true if P2 is Computer AI
 	 */
-	public CheckersWindow(Player player1, Player player2) {
+	public CheckersWindow(boolean p1IsComputer, boolean p2IsComputer) {
 		this();
-		setPlayer1(player1);
-		setPlayer2(player2);
+		setP1IsComputer(p1IsComputer);
+		setP2IsComputer(p2IsComputer);
 	}
 	
 	/**
@@ -93,23 +91,21 @@ public class CheckersWindow extends JFrame {
 	}
 
 	/**
-	 * Updates the Player 1 controller.
+	 * Updates Player 1 controller type.
 	 * 
-	 * @param player1 new Player instance
+	 * @param p1IsComputer true if computer
 	 */
-	public void setPlayer1(Player player1) {
-		this.board.setPlayer1(player1);
-		this.board.update();
+	public void setP1IsComputer(boolean p1IsComputer) {
+		this.board.setP1IsComputer(p1IsComputer);
 	}
 	
 	/**
-	 * Updates the Player 2 controller.
+	 * Updates Player 2 controller type.
 	 * 
-	 * @param player2 new Player instance
+	 * @param p2IsComputer true if computer
 	 */
-	public void setPlayer2(Player player2) {
-		this.board.setPlayer2(player2);
-		this.board.update();
+	public void setP2IsComputer(boolean p2IsComputer) {
+		this.board.setP2IsComputer(p2IsComputer);
 	}
 	
 	/**

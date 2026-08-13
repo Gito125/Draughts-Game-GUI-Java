@@ -4,21 +4,15 @@
  * Package:     model
  * Authors:     Group 3 — Precious, Gideon, Peter
  *              (Original Author: Devon McGrath)
- * Course:      Data Structures and Algorithms (2205 ST) — Y2T2
+ * Course:      Data Structures and Algorithms
  * 
- * Description: Memory-optimized representation of an 8x8 checkerboard. Checkers
- *              only occupy dark tiles (32 playable tiles total). The board packs
- *              3 bits per tile across an array of 3 integers (`int[3] state`),
- *              enabling ultra-fast bitwise operations and shallow array cloning.
+ * Description: Clean, 32-element array representation of an 8x8 checkerboard. Checkers
+ *              only occupy dark tiles (32 playable tiles total).
  *
  * DSA Concepts Applied:
- *   - Graphs (Graphs.pptx): Represents board topology as a 32-node 2D grid graph
- *     where playable dark tiles are vertices indexed 0 to 31, and diagonal moves
- *     form directed edges between adjacent node indices.
- *   - Mathematical Background (Mathematical Background DSA.pptx): Bitwise representation
- *     and bit manipulation functions (setBit, getBit) operating in O(1) time.
- *   - Intro To DSA (Intro To DSA.pptx): Compact memory layout reducing state copy
- *     overhead during recursive game tree search.
+ *   - Arrays / Data Layout: Represents 32 dark tile states directly in an array.
+ *   - Linear Search: Searches through 32 tile indices to find active pieces.
+ *   - Graphs: Maps 1D array indices (vertices) to 2D grid coordinates.
  * ============================================================================
  */
 
@@ -32,11 +26,6 @@ import java.util.List;
  * The {@code Board} class represents a checkers game board state.
  * Standard checkers is played on an 8x8 grid (64 tiles), alternating light/dark.
  * Checkers only occupy the 32 dark tiles and move diagonally.
- * 
- * <p><b>Memory Optimization (DSA: Mathematical Background):</b>
- * The board compresses 32 tile states into an array of 3 integers (3 bits per tile).
- * This makes {@link #copy()} run in O(1) time, which is critical for deep recursive
- * Minimax game tree searches (DSA: Trees in DSA).</p>
  */
 public class Board {
 	
@@ -47,18 +36,18 @@ public class Board {
 	public static final int EMPTY = 0;
 
 	/** ID of a normal black checker piece. */
-	public static final int BLACK_CHECKER = 4 * 1 + 2 * 1 + 1 * 0; // Bit representation: 6
+	public static final int BLACK_CHECKER = 6;
 	
 	/** ID of a normal white checker piece. */
-	public static final int WHITE_CHECKER = 4 * 1 + 2 * 0 + 1 * 0; // Bit representation: 4
+	public static final int WHITE_CHECKER = 4;
 
 	/** ID of a black king checker piece. */
-	public static final int BLACK_KING = 4 * 1 + 2 * 1 + 1 * 1;    // Bit representation: 7
+	public static final int BLACK_KING = 7;
 	
 	/** ID of a white king checker piece. */
-	public static final int WHITE_KING = 4 * 1 + 2 * 0 + 1 * 1;    // Bit representation: 5
+	public static final int WHITE_KING = 5;
 
-	/** Array holding 3 integers to store bitwise board state for 32 dark tiles. */
+	/** Array holding 32 integers to store board state for 32 dark tiles. */
 	private int[] state;
 	
 	/**
@@ -71,12 +60,7 @@ public class Board {
 	/**
 	 * Creates an exact clone of this board state.
 	 * 
-	 * <p><b>DSA Reference (Trees in DSA.pptx):</b>
-	 * Enables branching new state nodes in the game tree during search algorithms
-	 * without mutating the original board state.</p>
-	 * 
 	 * @return a new independent copy of this Board object
-	 * @complexity O(1) constant time array clone operation
 	 */
 	public Board copy() {
 		Board copy = new Board();
@@ -87,11 +71,9 @@ public class Board {
 	/**
 	 * Resets the checkerboard to initial game setup:
 	 * 12 black checkers on indices 0-11 (top rows) and 12 white checkers on indices 20-31 (bottom rows).
-	 * 
-	 * @complexity O(1) fixed 32 iterations
 	 */
 	public void reset() {
-		this.state = new int[3];
+		this.state = new int[32];
 		for (int i = 0; i < 12; i++) {
 			set(i, BLACK_CHECKER);
 			set(31 - i, WHITE_CHECKER);
@@ -101,12 +83,8 @@ public class Board {
 	/**
 	 * Searches the board for all dark tiles matching a specific piece ID.
 	 * 
-	 * <p><b>DSA Reference (Intro To DSA.pptx / Graphs.pptx):</b>
-	 * Linear search over 32 vertex indices to find active piece positions.</p>
-	 * 
 	 * @param id piece ID to search for
 	 * @return List of Point coordinates containing the matching piece ID
-	 * @complexity O(1) since board size is constant (32 dark tiles)
 	 */
 	public List<Point> find(int id) {
 		List<Point> points = new ArrayList<>();
@@ -131,14 +109,9 @@ public class Board {
 	
 	/**
 	 * Sets the piece ID at a specific dark tile index (0 to 31).
-	 * Uses bitwise operations to set 3 state bits corresponding to the index.
-	 * 
-	 * <p><b>DSA Reference (Mathematical Background DSA.pptx):</b>
-	 * Bit manipulation routines to pack integer flags into a 3-int state array.</p>
 	 * 
 	 * @param index tile index (0 to 31)
 	 * @param id piece ID to assign
-	 * @complexity O(1) constant time bitwise mutation
 	 */
 	public void set(int index, int id) {
 		if (!isValidIndex(index)) {
@@ -147,10 +120,7 @@ public class Board {
 		if (id < 0) {
 			id = EMPTY;
 		}
-		for (int i = 0; i < state.length; i++) {
-			boolean set = ((1 << (state.length - i - 1)) & id) != 0;
-			this.state[i] = setBit(state[i], index, set);
-		}
+		this.state[index] = id;
 	}
 	
 	/**
@@ -166,28 +136,22 @@ public class Board {
 	
 	/**
 	 * Gets the piece ID at a specific dark tile index (0 to 31).
-	 * Reconstructs 3-bit piece ID from the state array.
 	 * 
 	 * @param index tile index (0 to 31)
 	 * @return piece ID or {@link #INVALID} if index is out of bounds
-	 * @complexity O(1) constant time bitwise access
 	 */
 	public int get(int index) {
 		if (!isValidIndex(index)) {
 			return INVALID;
 		}
-		return getBit(state[0], index) * 4 + getBit(state[1], index) * 2 + getBit(state[2], index);
+		return state[index];
 	}
 	
 	/**
 	 * Maps a 1D dark tile index (0 to 31) to 2D grid coordinates Point(x, y).
 	 * 
-	 * <p><b>DSA Reference (Graphs.pptx):</b>
-	 * Converts 1D vertex IDs into 2D geometric grid coordinates.</p>
-	 * 
 	 * @param index tile index (0 to 31)
 	 * @return Point(x, y) or Point(-1, -1) if index is invalid
-	 * @complexity O(1) constant time formula calculation
 	 */
 	public static Point toPoint(int index) {
 		if (!isValidIndex(index)) {
@@ -204,7 +168,6 @@ public class Board {
 	 * @param x x-coordinate (0 to 7)
 	 * @param y y-coordinate (0 to 7)
 	 * @return index (0 to 31) or -1 if invalid/light tile
-	 * @complexity O(1) constant time formula calculation
 	 */
 	public static int toIndex(int x, int y) {
 		if (!isValidPoint(new Point(x, y))) {
@@ -221,42 +184,6 @@ public class Board {
 	 */
 	public static int toIndex(Point p) {
 		return (p == null) ? -1 : toIndex(p.x, p.y);
-	}
-	
-	/**
-	 * Bitwise utility function to set or clear a specific bit position in an integer.
-	 * 
-	 * @param target target integer
-	 * @param bit bit position (0 to 31)
-	 * @param set true to set (1), false to clear (0)
-	 * @return updated target integer
-	 * @complexity O(1) constant time bitwise shift and mask
-	 */
-	public static int setBit(int target, int bit, boolean set) {
-		if (bit < 0 || bit > 31) {
-			return target;
-		}
-		if (set) {
-			target |= (1 << bit);
-		} else {
-			target &= (~(1 << bit));
-		}
-		return target;
-	}
-	
-	/**
-	 * Bitwise utility function to extract the value of a specific bit.
-	 * 
-	 * @param target target integer
-	 * @param bit bit position (0 to 31)
-	 * @return 1 if set, 0 if clear
-	 * @complexity O(1) constant time bitwise AND shift
-	 */
-	public static int getBit(int target, int bit) {
-		if (bit < 0 || bit > 31) {
-			return 0;
-		}
-		return (target & (1 << bit)) != 0 ? 1 : 0;
 	}
 	
 	/**

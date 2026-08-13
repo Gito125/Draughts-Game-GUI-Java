@@ -4,19 +4,16 @@
  * Package:     model
  * Authors:     Group 3 — Precious, Gideon, Peter
  *              (Original Author: Devon McGrath)
- * Course:      Data Structures and Algorithms (2205 ST) — Y2T2
+ * Course:      Data Structures and Algorithms
  * 
  * Description: Manages checkers game state, turn progression, move execution,
  *              king promotions, and game termination rules including draw detection
  *              via move counters and board state history tracking.
  *
  * DSA Concepts Applied:
- *   - Stacks (stacks.pdf): Maintains stateHistory as a stack/sequence of board states
- *     for 3-fold repetition draw detection.
- *   - Intro To DSA (Intro To DSA.pptx): State serialization and deserialization
- *     (getGameState / setGameState) for state persistence and deep cloning.
- *   - Mathematical Background (Mathematical Background DSA.pptx): Move counters
- *     and complexity analysis of state history search O(k).
+ *   - Board History List: Maintains stateHistory to record past board states for 3-fold repetition draw detection.
+ *   - State Serialization: Converts board states to compact strings for storage and state comparison.
+ *   - Game State Machine: Tracks active player turn, move counters, and game over triggers.
  * ============================================================================
  */
 
@@ -62,9 +59,6 @@ public class Game {
 
 	/**
 	 * History sequence of serialized board states for 3-fold repetition detection.
-	 * 
-	 * <p><b>DSA Reference (stacks.pdf):</b>
-	 * Acts as a LIFO state stack history for tracking game trajectory frames.</p>
 	 */
 	private List<String> stateHistory;
 	
@@ -106,12 +100,7 @@ public class Game {
 	/**
 	 * Creates a deep copy of this Game instance.
 	 * 
-	 * <p><b>DSA Reference (Trees in DSA.pptx):</b>
-	 * Used extensively during recursive Minimax search to simulate future states
-	 * without mutating the active game state.</p>
-	 * 
 	 * @return exact independent copy of this Game object
-	 * @complexity O(1) constant time copy
 	 */
 	public Game copy() {
 		Game g = new Game();
@@ -167,13 +156,9 @@ public class Game {
 	 * Updates board state, performs piece capture removal, manages king promotions,
 	 * handles multi-jump locks, updates draw counters, and toggles turns.
 	 * 
-	 * <p><b>DSA Reference (Graphs.pptx / Linear Search):</b>
-	 * Updates graph nodes and evaluates multi-jump continuation edges.</p>
-	 * 
 	 * @param startIndex start tile index (0 to 31)
 	 * @param endIndex   end tile index (0 to 31)
 	 * @return true if move was executed successfully
-	 * @complexity O(1) constant time execution
 	 */
 	public boolean move(int startIndex, int endIndex) {
 		// Validate move using rule engine
@@ -222,7 +207,7 @@ public class Game {
 			this.isP1Turn = !isP1Turn;
 			this.skipIndex = -1;
 			this.totalMoves++;
-			// Push current board state to state history stack for repetition detection
+			// Store board state string to state history list for repetition detection
 			this.stateHistory.add(this.board.toString());
 		}
 		
@@ -244,11 +229,7 @@ public class Game {
 	 * 2. 3-fold board state repetition
 	 * 3. 200 total move limit reached
 	 * 
-	 * <p><b>DSA Reference (stacks.pdf / Intro To DSA):</b>
-	 * Uses frequency count over stateHistory stack sequence to detect 3-fold repetition.</p>
-	 * 
 	 * @return true if game is a draw
-	 * @complexity O(N) where N is number of moves in stateHistory
 	 */
 	public boolean isDraw() {
 		// Condition 1: 40 moves without capture
@@ -299,7 +280,6 @@ public class Game {
 	 * Determines if the game has concluded (either by player elimination, no available moves, or draw).
 	 * 
 	 * @return true if game is over
-	 * @complexity O(p) checking moves for active player pieces
 	 */
 	public boolean isGameOver() {
 		// Check draw conditions first

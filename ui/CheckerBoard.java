@@ -4,7 +4,7 @@
  * Package:     ui
  * Authors:     Group 3 — Precious, Gideon, Peter
  *              (Original Author: Devon McGrath)
- * Course:      Data Structures and Algorithms (2205 ST) — Y2T2
+ * Course:      Data Structures and Algorithms
  * 
  * Description: Swing GUI component rendering the 8x8 draughts board, piece graphics,
  *              move/capture highlights, turn indicators, and game over / draw messages.
@@ -12,10 +12,9 @@
  *              for automated computer AI players.
  *
  * DSA Concepts Applied:
- *   - Graphs (Graphs.pptx): Visualizes the 32-tile graph board layout and renders
- *     movement path vectors.
- *   - Queues (Queues.pptx): Uses Swing Timer event dispatching for non-blocking AI turns.
- *   - Intro To DSA (Intro To DSA.pptx): GUI view rendering separated from state logic.
+ *   - Graph Visualization: Visualizes the 32-tile graph board layout and renders movement path vectors.
+ *   - Event Dispatch Queue: Uses Swing Timer event dispatching for non-blocking AI turns.
+ *   - UI Separation: GUI view rendering separated from state logic.
  * ============================================================================
  */
 
@@ -38,9 +37,8 @@ import javax.swing.Timer;
 import logic.MoveGenerator;
 import logic.MoveLogic;
 import model.Board;
+import model.ComputerPlayer;
 import model.Game;
-import model.HumanPlayer;
-import model.Player;
 
 /**
  * The {@code CheckerBoard} class renders the visual board UI, handles user input,
@@ -53,7 +51,7 @@ public class CheckerBoard extends JButton {
 	/** Border padding (pixels). */
 	private static final int PADDING = 16;
 
-	/** Configurable millisecond delay between AI moves (default 1000ms). */
+	/** Fixed millisecond delay between AI moves (1000ms = 1 sec). */
 	private int timerDelay = 1000;
 
 	/** Active checkers game state model. */
@@ -62,11 +60,14 @@ public class CheckerBoard extends JButton {
 	/** Parent CheckersWindow reference. */
 	private CheckersWindow window;
 	
-	/** Player 1 (Black) controller. */
-	private Player player1;
+	/** Flag indicating if Player 1 (Black) is a Computer AI. */
+	private boolean p1IsComputer;
 	
-	/** Player 2 (White) controller. */
-	private Player player2;
+	/** Flag indicating if Player 2 (White) is a Computer AI. */
+	private boolean p2IsComputer;
+	
+	/** Shared AI computer player instance. */
+	private ComputerPlayer computerAI;
 	
 	/** Currently selected tile Point on the board. */
 	private Point selected;
@@ -87,10 +88,10 @@ public class CheckerBoard extends JButton {
 	private Timer timer;
 	
 	public CheckerBoard(CheckersWindow window) {
-		this(window, new Game(), null, null);
+		this(window, new Game(), false, false);
 	}
 	
-	public CheckerBoard(CheckersWindow window, Game game, Player player1, Player player2) {
+	public CheckerBoard(CheckersWindow window, Game game, boolean p1IsComputer, boolean p2IsComputer) {
 		super.setBorderPainted(false);
 		super.setFocusPainted(false);
 		super.setContentAreaFilled(false);
@@ -101,21 +102,14 @@ public class CheckerBoard extends JButton {
 		this.lightTile = Color.WHITE;
 		this.darkTile = Color.BLACK;
 		this.window = window;
-		setPlayer1(player1);
-		setPlayer2(player2);
+		this.computerAI = new ComputerPlayer();
+		setP1IsComputer(p1IsComputer);
+		setP2IsComputer(p2IsComputer);
 	}
 	
-	/**
-	 * Configures dynamic AI turn delay speed.
-	 * 
-	 * @param delay delay in milliseconds (200ms to 3000ms)
-	 */
-	public void setTimerDelay(int delay) {
-		this.timerDelay = Math.max(100, delay);
-	}
-
-	public int getTimerDelay() {
-		return timerDelay;
+	public boolean isCurrentPlayerHuman() {
+		boolean isP1Turn = game.isP1Turn();
+		return isP1Turn ? !p1IsComputer : !p2IsComputer;
 	}
 
 	/**
@@ -130,13 +124,9 @@ public class CheckerBoard extends JButton {
 	/**
 	 * Schedules AI move execution on a Swing Timer.
 	 * Stops any existing running timer to prevent memory/timer leaks.
-	 * 
-	 * <p><b>DSA Reference (Queues.pptx):</b>
-	 * Enqueues AI turn updates onto the Swing Event Dispatch Thread queue after specified delay.</p>
 	 */
 	private void runPlayer() {
-		Player player = getCurrentPlayer();
-		if (player == null || player.isHuman() || isGameOver) {
+		if (isCurrentPlayerHuman() || isGameOver) {
 			return;
 		}
 		
@@ -150,7 +140,7 @@ public class CheckerBoard extends JButton {
 			public void actionPerformed(ActionEvent e) {
 				timer.stop();
 				if (!game.isGameOver()) {
-					getCurrentPlayer().updateGame(game);
+					computerAI.updateGame(game);
 				}
 				update();
 			}
@@ -323,30 +313,28 @@ public class CheckerBoard extends JButton {
 		this.window = window;
 	}
 
-	public Player getPlayer1() {
-		return player1;
+	public boolean isP1IsComputer() {
+		return p1IsComputer;
 	}
 
-	public void setPlayer1(Player player1) {
-		this.player1 = (player1 == null) ? new HumanPlayer() : player1;
-		if (game.isP1Turn() && !this.player1.isHuman()) {
+	public void setP1IsComputer(boolean p1IsComputer) {
+		this.p1IsComputer = p1IsComputer;
+		if (game.isP1Turn() && p1IsComputer) {
 			this.selected = null;
 		}
+		update();
 	}
 
-	public Player getPlayer2() {
-		return player2;
+	public boolean isP2IsComputer() {
+		return p2IsComputer;
 	}
 
-	public void setPlayer2(Player player2) {
-		this.player2 = (player2 == null) ? new HumanPlayer() : player2;
-		if (!game.isP1Turn() && !this.player2.isHuman()) {
+	public void setP2IsComputer(boolean p2IsComputer) {
+		this.p2IsComputer = p2IsComputer;
+		if (!game.isP1Turn() && p2IsComputer) {
 			this.selected = null;
 		}
-	}
-	
-	public Player getCurrentPlayer() {
-		return game.isP1Turn() ? player1 : player2;
+		update();
 	}
 
 	/**
@@ -356,7 +344,7 @@ public class CheckerBoard extends JButton {
 	 * @param y click y-coordinate
 	 */
 	private void handleClick(int x, int y) {
-		if (isGameOver || !getCurrentPlayer().isHuman()) {
+		if (isGameOver || !isCurrentPlayerHuman()) {
 			return;
 		}
 		

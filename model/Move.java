@@ -4,19 +4,14 @@
  * Package:     model
  * Authors:     Group 3 — Precious, Gideon, Peter
  *              (Original Author: Devon McGrath)
- * Course:      Data Structures and Algorithms (2205 ST) — Y2T2
+ * Course:      Data Structures and Algorithms
  * 
  * Description: Represents a single move operation on the checkerboard, storing
- *              start/end tile indices and a heuristic weight value used by the
- *              AI evaluation search. Implements Comparable for move ordering.
+ *              start/end tile indices and a heuristic evaluation weight used by
+ *              the Minimax decision algorithm.
  *
  * DSA Concepts Applied:
- *   - Linked Lists (Linked Lists.pptx): Move paths represent discrete step pairs.
- *   - Sorting Techniques (Sorting Techniques.pptx / Merge & Quick sort.pptx):
- *     Implements Comparable<Move> to enable sorting moves by heuristic score,
- *     which optimizes Alpha-Beta pruning performance in Minimax tree search.
- *   - Mathematical Background (Mathematical Background DSA.pptx):
- *     Stores floating-point evaluation weights for decision boundary ranking.
+ *   - Move Representation: Data object holding start tile index, end tile index, and evaluation weight.
  * ============================================================================
  */
 
@@ -28,7 +23,7 @@ import java.awt.Point;
  * The {@code Move} class represents a move action between board tiles and
  * maintains an evaluation weight for AI move selection algorithms.
  */
-public class Move implements Comparable<Move> {
+public class Move {
 	
 	/** The weight corresponding to an invalid or illegal move. */
 	public static final double WEIGHT_INVALID = Double.NEGATIVE_INFINITY;
@@ -104,28 +99,6 @@ public class Move implements Comparable<Move> {
 
 	public void setWeight(double weight) {
 		this.weight = weight;
-	}
-	
-	public void changeWeight(double delta) {
-		this.weight += delta;
-	}
-
-	/**
-	 * Compares two moves based on their heuristic weights in descending order
-	 * (higher weight moves come first). Used by sorting algorithms.
-	 * 
-	 * <p><b>DSA Reference (Merge & Quick sort.pptx / Sorting Techniques.pptx):</b>
-	 * Facilitates quick comparison operations required by sorting algorithms
-	 * like Quick Sort (used by Collections.sort()) to order moves for optimal
-	 * Alpha-Beta tree pruning.</p>
-	 * 
-	 * @param other the move to compare against
-	 * @return negative if this weight > other weight, positive if less, 0 if equal
-	 * @complexity O(1) constant time comparison
-	 */
-	@Override
-	public int compareTo(Move other) {
-		return Double.compare(other.weight, this.weight); // Descending order
 	}
 
 	@Override
