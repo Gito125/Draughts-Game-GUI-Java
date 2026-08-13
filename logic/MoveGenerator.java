@@ -4,18 +4,15 @@
  * Package:     logic
  * Authors:     Group 3 — Precious, Gideon, Peter
  *              (Original Author: Devon McGrath)
- * Course:      Data Structures and Algorithms (2205 ST) — Y2T2
+ * Course:      Data Structures and Algorithms
  * 
  * Description: Generates legal single-step move destination coordinates and multi-step
  *              capture skip destination coordinates for pieces on the checkerboard.
  *
  * DSA Concepts Applied:
- *   - Graphs (Graphs.pptx): Explores board graph adjacency vertices for diagonal edges
- *     at distance 1 (normal move) and distance 2 (capture skip).
- *   - BFS & DFS (BFS & DFS.pptx): Serves as child-node expansion generator during DFS
- *     game tree traversal in Minimax AI search algorithms.
- *   - Linked Lists (Linked Lists.pptx): Dynamically populates and filters List<Point>
- *     collections representing potential geometric move destinations.
+ *   - Graph Adjacency: Explores board graph adjacency vertices for diagonal edges.
+ *   - Child Node Generator: Serves as child-node expansion generator during DFS game tree traversal.
+ *   - Dynamic Lists: Dynamically populates and filters List<Point> move destinations.
  * ============================================================================
  */
 
@@ -47,13 +44,9 @@ public class MoveGenerator {
 	/**
 	 * Gets a list of legal 1-step diagonal move destination points for a piece at startIndex.
 	 * 
-	 * <p><b>DSA Reference (Graphs.pptx / BFS & DFS.pptx):</b>
-	 * Traverses adjacent graph vertices at distance 1 and filters out occupied tiles.</p>
-	 * 
 	 * @param board      board instance to query
 	 * @param startIndex start tile index (0 to 31)
 	 * @return List of empty destination Points
-	 * @complexity O(1) constant time (checks max 4 diagonal neighbors)
 	 */
 	public static List<Point> getMoves(Board board, int startIndex) {
 		List<Point> endPoints = new ArrayList<>();
@@ -90,13 +83,9 @@ public class MoveGenerator {
 	/**
 	 * Gets a list of candidate 2-step capture skip destination points for a piece at startIndex.
 	 * 
-	 * <p><b>DSA Reference (Graphs.pptx):</b>
-	 * Checks graph vertices at distance 2 and validates opponent piece capture conditions.</p>
-	 * 
 	 * @param board      board instance to query
 	 * @param startIndex start tile index (0 to 31)
 	 * @return List of valid jump destination Points
-	 * @complexity O(1) constant time (checks max 4 jump directions)
 	 */
 	public static List<Point> getSkips(Board board, int startIndex) {
 		List<Point> endPoints = new ArrayList<>();
@@ -126,8 +115,7 @@ public class MoveGenerator {
 	 * @param board      board instance to query
 	 * @param startIndex start tile index (0 to 31)
 	 * @param endIndex   end tile index (0 to 31)
-	 * @return true if skip is legal under draughts rules
-	 * @complexity O(1) constant time lookup
+	 * @return true if skip is legal under draft rules
 	 */
 	public static boolean isValidSkip(Board board, int startIndex, int endIndex) {
 		if (board == null) {
@@ -161,7 +149,6 @@ public class MoveGenerator {
 	 * @param p      center Point coordinate
 	 * @param id     piece ID
 	 * @param delta  offset distance (1 for moves, 2 for skips)
-	 * @complexity O(1) constant time additions
 	 */
 	public static void addPoints(List<Point> points, Point p, int id, int delta) {
 		boolean isKing = Board.isKingChecker(id);

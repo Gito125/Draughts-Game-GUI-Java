@@ -4,17 +4,15 @@
  * Package:     logic
  * Authors:     Group 3 — Precious, Gideon, Peter
  *              (Original Author: Devon McGrath)
- * Course:      Data Structures and Algorithms (2205 ST) — Y2T2
+ * Course:      Data Structures and Algorithms
  * 
  * Description: Rule engine for validating legal moves in accordance with official
- *              draughts rules, enforcing mandatory capture jumps, diagonal movement,
+ *              draft rules, enforcing mandatory capture jumps, diagonal movement,
  *              king promotion rules, and multi-jump turn locks.
  *
  * DSA Concepts Applied:
- *   - Graphs (Graphs.pptx): Validates directed edge movements between 32 tile nodes.
- *   - Trees (Trees in DSA.pptx): Prunes illegal move branches during game tree search.
- *   - Mathematical Background (Mathematical Background DSA.pptx): Manhattan vector
- *     distance calculations (|dx| == |dy|) for diagonal movement verification.
+ *   - Rule Engine / Validation Logic: Ensures candidate move steps satisfy diagonal movement and jump constraints.
+ *   - Geometric Offset Calculations: Validates vector displacement (|dx| == |dy|).
  * ============================================================================
  */
 
@@ -28,7 +26,7 @@ import model.Board;
 import model.Game;
 
 /**
- * The {@code MoveLogic} class enforces all official draughts rules and move validity checks.
+ * The {@code MoveLogic} class enforces all official draft rules and move validity checks.
  */
 public class MoveLogic {
 
@@ -38,7 +36,7 @@ public class MoveLogic {
 	 * @param game       game instance
 	 * @param startIndex start tile index (0 to 31)
 	 * @param endIndex   end tile index (0 to 31)
-	 * @return true if move is valid under draughts rules
+	 * @return true if move is valid under draft rules
 	 */
 	public static boolean isValidMove(Game game, int startIndex, int endIndex) {
 		return game != null && isValidMove(game.getBoard(), game.isP1Turn(), startIndex, endIndex, game.getSkipIndex());
@@ -47,16 +45,12 @@ public class MoveLogic {
 	/**
 	 * Determines if a proposed move is legal given board state, turn player, and multi-jump lock state.
 	 * 
-	 * <p><b>DSA Reference (Trees in DSA.pptx / Graphs.pptx):</b>
-	 * Validates edge transitions between state tree nodes, ensuring turn locks and forced captures.</p>
-	 * 
 	 * @param board      current board state
 	 * @param isP1Turn   true if Player 1 (Black) turn, false if Player 2 (White) turn
 	 * @param startIndex start tile index
 	 * @param endIndex   end tile index
 	 * @param skipIndex  index of piece locked in multi-jump (-1 if no lock)
 	 * @return true if move complies with all rules
-	 * @complexity O(p) where p is total number of active player pieces checked for forced captures
 	 */
 	public static boolean isValidMove(Board board, boolean isP1Turn, int startIndex, int endIndex, int skipIndex) {
 		if (board == null || !Board.isValidIndex(startIndex) || !Board.isValidIndex(endIndex)) {
@@ -107,10 +101,6 @@ public class MoveLogic {
 	/**
 	 * Validates diagonal movement vectors and enforces mandatory capture jumps.
 	 * 
-	 * <p><b>DSA Reference (Mathematical Background DSA.pptx):</b>
-	 * Checks geometric vector offsets |dx| == |dy| for diagonal movement and enforces
-	 * mandatory capture rule: if any piece can jump, normal 1-step moves are prohibited.</p>
-	 * 
 	 * @param board      board state
 	 * @param isP1Turn   turn flag
 	 * @param startIndex start index
@@ -152,57 +142,6 @@ public class MoveLogic {
 				if (!MoveGenerator.getSkips(board, index).isEmpty()) {
 					return false;
 				}
-			}
-		}
-		
-		return true;
-	}
-	
-	/**
-	 * Evaluates whether a piece at a specified position is currently safe from opponent captures.
-	 * 
-	 * @param board   board state
-	 * @param checker piece position
-	 * @return true if no enemy piece can capture this piece on the next turn
-	 */
-	public static boolean isSafe(Board board, Point checker) {
-		if (board == null || checker == null) {
-			return true;
-		}
-		int index = Board.toIndex(checker);
-		if (index < 0) {
-			return true;
-		}
-		int id = board.get(index);
-		if (id == Board.EMPTY) {
-			return true;
-		}
-		
-		boolean isBlack = Board.isBlackChecker(id);
-		List<Point> check = new ArrayList<>();
-		MoveGenerator.addPoints(check, checker, Board.BLACK_KING, 1);
-		
-		for (Point p : check) {
-			int start = Board.toIndex(p);
-			int tid = board.get(start);
-			
-			if (tid == Board.EMPTY || tid == Board.INVALID) {
-				continue;
-			}
-			
-			boolean isWhite = Board.isWhiteChecker(tid);
-			if (isBlack && !isWhite) {
-				continue;
-			}
-			
-			int dx = (checker.x - p.x) * 2;
-			int dy = (checker.y - p.y) * 2;
-			if (!Board.isKingChecker(tid) && (isWhite ^ (dy < 0))) {
-				continue;
-			}
-			int endIndex = Board.toIndex(new Point(p.x + dx, p.y + dy));
-			if (MoveGenerator.isValidSkip(board, start, endIndex)) {
-				return false;
 			}
 		}
 		
