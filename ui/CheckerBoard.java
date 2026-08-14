@@ -5,7 +5,7 @@
  * Authors:     Group 3 — Precious, Gideon, Peter
  * Course:      Data Structures and Algorithms
  * 
- * Description: Swing GUI component rendering the 8x8 draft board, piece graphics,
+ * Description: Swing GUI component rendering the 8x8 Draughts board, piece graphics,
  *              move/capture highlights, turn indicators, and game over / draw messages.
  *              Handles mouse click input for human players and manages execution timers
  *              for automated computer AI players.
@@ -149,7 +149,7 @@ public class CheckerBoard extends JButton {
 	}
 	
 	/**
-	 * Draws the current draft game state and UI highlights.
+	 * Draws the current Draughts game state and UI highlights.
 	 */
 	@Override
 	public void paint(Graphics g) {

@@ -115,7 +115,7 @@ public class MoveGenerator {
 	 * @param board      board instance to query
 	 * @param startIndex start tile index (0 to 31)
 	 * @param endIndex   end tile index (0 to 31)
-	 * @return true if skip is legal under draft rules
+	 * @return true if skip is legal under Draughts rules
 	 */
 	public static boolean isValidSkip(Board board, int startIndex, int endIndex) {
 		if (board == null) {

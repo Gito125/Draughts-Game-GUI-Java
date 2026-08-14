@@ -28,7 +28,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 /**
- * The {@code OptionPanel} class provides Swing controls for configuring draft game settings,
+ * The {@code OptionPanel} class provides Swing controls for configuring Draughts game settings,
  * including controller types (Human/Computer) and start/restart buttons.
  */
 public class OptionPanel extends JPanel {
