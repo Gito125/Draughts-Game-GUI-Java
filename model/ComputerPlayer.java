@@ -6,7 +6,7 @@
  *              
  * Course:      Data Structures and Algorithms
  * 
- * Description: Implements the AI/Computer opponent for Draft using Minimax game tree search
+ * Description: Implements the AI/Computer opponent for Draughts using Minimax game tree search
  *              at a fixed depth of 3 with material-count heuristic evaluation.
  *
  * DSA Concepts Applied:
@@ -26,7 +26,7 @@ import java.util.List;
 import logic.MoveGenerator;
 
 /**
- * The {@code ComputerPlayer} class represents an automated AI opponent in draft.
+ * The {@code ComputerPlayer} class represents an automated AI opponent in Draughts.
  * It evaluates candidate move branches on a simulated game tree using the Minimax search algorithm.
  */
 public class ComputerPlayer {

@@ -4,7 +4,7 @@
  * Package:     ui
  * Authors:     Group 3 — Precious, Gideon, Peter
  *              
- * Main entry point for the draft application.
+ * Main entry point for the Draughts application.
  * ============================================================================
  */
 
